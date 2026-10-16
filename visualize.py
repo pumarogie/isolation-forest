@@ -19,6 +19,11 @@ fig, ax = plt.subplots(2, 2, figsize=(12, 11))
 
 
 def score_map(a, scores, flags, title):
+    """Draw anomaly scores over the grid as a filled contour, then the data on top.
+
+    scores: one score per grid point; flags: 1/0 anomaly label per data point,
+    so flagged points show in red and normal ones in white.
+    """
     cs = a.contourf(gx, gy, scores.reshape(gx.shape), levels=20, cmap="magma_r")
     fig.colorbar(cs, ax=a, label="anomaly score")
     a.scatter(*X[flags == 0].T, s=10, c="white", edgecolors="k", linewidths=0.3, label="normal")
@@ -39,7 +44,13 @@ ax[1, 0].legend()
 
 
 def draw_splits(a, node, box, depth=0):
-    """Recursively draw axis-aligned cuts of one iTree; box = [xmin, xmax, ymin, ymax]."""
+    """Draw every cut of one iTree as a line inside the region it splits.
+
+    box = [xmin, xmax, ymin, ymax] is the region the current node covers. A cut
+    on feature 0 is a vertical line, on feature 1 a horizontal one; the region
+    is then split in two and each child is drawn inside its half. Early cuts
+    are dark and thick, deeper cuts lighter and thinner.
+    """
     if "size" in node:
         return
     f, v = node["feature"], node["split"]
